@@ -16,7 +16,8 @@
     },
 
     "require-dev": {
-        "phore/tester": "*"
+        "phore/tester": "*",
+        "brace/mod-request-zend": "*"
     },
     "autoload": {
         "psr-4": {
