@@ -1,0 +1,37 @@
+{
+    "name": "brace/mod-router",
+    "type": "library",
+    "description": "Router Component for Brace App Framework",
+    "keywords": ["Router", "Dependency Injection", "Di"],
+    "homepage": "https://infracamp.org",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Matthias Leuffen",
+            "email": "matthes@leuffen.de"
+        }
+    ],
+    "require": {
+        "brace/core": "*"
+    },
+
+    "require-dev": {
+        "phore/tester": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Brace\\Router\\": "src"
+        },
+        "files": [
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+        }
+    },
+    "minimum-stability": "dev",
+    "extra": {
+        "branch-alias": {
+        }
+    }
+}
