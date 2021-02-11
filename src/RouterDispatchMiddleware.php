@@ -27,6 +27,7 @@ class RouterDispatchMiddleware extends BraceAbstractMiddleware
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        $response = null;
         if ($this->app->route->isDefined()) {
             $response = phore_di_call($this->app->route->controller, $this->app);
         }
