@@ -4,7 +4,7 @@
 namespace Brace\Router;
 
 
-use Brace\Core\Base\NotFoundRequestHandler;
+use Brace\Core\Base\NotFoundMiddleware;
 use Brace\Core\BraceApp;
 use Brace\Core\BraceModule;
 use Phore\Di\Container\Producer\DiValue;

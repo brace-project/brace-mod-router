@@ -4,6 +4,7 @@
 namespace Brace\Router;
 
 
+use Brace\Core\Base\BraceAbstractMiddleware;
 use Brace\Core\BraceApp;
 use Brace\Core\ReturnFormatterInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -11,22 +12,16 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class RouterDispatchMiddleware implements MiddlewareInterface
+class RouterDispatchMiddleware extends BraceAbstractMiddleware
 {
-
-    /**
-     * @var BraceApp
-     */
-    private $app;
 
     /**
      * @var ReturnFormatterInterface
      */
     private $returnFormatter;
 
-    public function __construct (BraceApp $app, ReturnFormatterInterface $returnFormatter = null)
+    public function __construct (ReturnFormatterInterface $returnFormatter = null)
     {
-        $this->app = $app;
         $this->returnFormatter = $returnFormatter;
     }
 
