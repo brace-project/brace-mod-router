@@ -17,7 +17,7 @@
 
     "require-dev": {
         "phore/tester": "*",
-        "brace/mod-request-zend": "*"
+        "brace/mod-request-laminas": "*"
     },
     "autoload": {
         "psr-4": {
