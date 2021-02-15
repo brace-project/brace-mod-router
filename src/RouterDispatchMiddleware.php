@@ -4,6 +4,7 @@
 namespace Brace\Router;
 
 
+use Brace\Core\Base\BraceAbstractMiddleware;
 use Brace\Core\BraceApp;
 use Brace\Core\ReturnFormatterInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -11,27 +12,26 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class RouterDispatchMiddleware implements MiddlewareInterface
+class RouterDispatchMiddleware extends BraceAbstractMiddleware
 {
 
     /**
-     * @var BraceApp
+     * @var ReturnFormatterInterface[]
      */
-    private $app;
+    private $returnFormatters = [];
 
     /**
-     * @var ReturnFormatterInterface
+     * RouterDispatchMiddleware constructor.
+     * @param ReturnFormatterInterface|null $returnFormatter
      */
-    private $returnFormatter;
-
-    public function __construct (BraceApp $app, ReturnFormatterInterface $returnFormatter = null)
+    public function __construct (array $returnFormatters = [])
     {
-        $this->app = $app;
-        $this->returnFormatter = $returnFormatter;
+        $this->returnFormatters = $returnFormatters;
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        $response = null;
         if ($this->app->route->isDefined()) {
             $response = phore_di_call($this->app->route->controller, $this->app);
         }
@@ -39,11 +39,15 @@ class RouterDispatchMiddleware implements MiddlewareInterface
             if ($response instanceof ResponseInterface)
                 return $response;
 
-            // Return and don't call next handler
-            if ($this->returnFormatter === null) {
-                throw new \InvalidArgumentException("Controller " . phore_var($this->app->route->controller) . " returned complex result but no ReturnFormatter is defined.");
+            foreach ($this->returnFormatters as $returnFormatter) {
+                if ($returnFormatter->canHandle($response)) {
+                    // Use first ReturnFormatter found
+                    return $returnFormatter->transform($response);
+                }
+
+
             }
-            return $this->returnFormatter->transform($response);
+            throw new \InvalidArgumentException("Controller " . phore_var($this->app->route->controller) . " returned complex result but no ReturnFormatter can handle it.");
         }
 
         // Call next handler
