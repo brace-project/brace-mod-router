@@ -17,11 +17,11 @@ class RouteParams
         return isset ($this->params[$key]);
     }
 
-    public function get(string $key, $default=null) : ?string
+    public function get(string $key) : ?string
     {
         if ( ! isset ($this->params[$key])) {
             return null;
         }
-        return $this->params[$key] ?? $default;
+        return $this->params[$key];
     }
 }
