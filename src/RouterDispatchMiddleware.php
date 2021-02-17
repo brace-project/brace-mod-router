@@ -45,6 +45,7 @@ class RouterDispatchMiddleware extends BraceAbstractMiddleware
                     $result = $returnFormatter->transform($response);
                     if ( ! $result instanceof ResponseInterface)
                         throw new \InvalidArgumentException("Return Formatter " . phore_debug_type($returnFormatter) . " returned invalid result: Expected: ResponseInterface Found: " . phore_debug_type($result));
+                    return $result;
                 }
             }
             throw new \InvalidArgumentException("Controller " . phore_debug_type($this->app->route->controller) . " returned " . phore_debug_type($response). ". No ReturnFormatter can handle it.");
