@@ -59,21 +59,20 @@ class Router
      */
     public function _evalRoute(ServerRequestInterface $serverRequest) : Route
     {
-        $foundRoute = null;
-
         foreach ($this->routes as $curRoute) {
             $routeParams = [];
-            $routeMatch = "*";
+
             if (isset ($curRoute["methods"])) {
-                if ( ! in_array($serverRequest->getMethod(), $curRoute["methods"])) {
+                if ( ! in_array(trim (strtoupper($serverRequest->getMethod())), $curRoute["methods"])) {
                     continue;
                 }
             }
+
             if (isset($curRoute["route"])) {
                 if ( ! RouteMatcher::IsMatching($curRoute["route"], $serverRequest, $routeParams)) {
                     continue;
                 }
-            }
+            } 
             return new Route(
                 $curRoute["route"],
                 $serverRequest->getUri()->getPath(),

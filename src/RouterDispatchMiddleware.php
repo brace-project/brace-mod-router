@@ -34,8 +34,8 @@ class RouterDispatchMiddleware extends BraceAbstractMiddleware
         $response = null;
         if ($this->app->route->isDefined()) {
             $response = phore_di_call($this->app->route->controller, $this->app);
-        }
-        if ($response !== null) {
+            if ($response === null)
+                throw new \InvalidArgumentException("Controller " . phore_debug_type($this->app->route->controller) . " returned null");
             if ($response instanceof ResponseInterface)
                 return $response;
 
@@ -44,10 +44,8 @@ class RouterDispatchMiddleware extends BraceAbstractMiddleware
                     // Use first ReturnFormatter found
                     return $returnFormatter->transform($response);
                 }
-
-
             }
-            throw new \InvalidArgumentException("Controller " . phore_var($this->app->route->controller) . " returned complex result but no ReturnFormatter can handle it.");
+            throw new \InvalidArgumentException("Controller " . phore_debug_type($this->app->route->controller) . " returned " . phore_debug_type($response). " result but no ReturnFormatter can handle it.");
         }
 
         // Call next handler
