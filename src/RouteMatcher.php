@@ -19,16 +19,16 @@ class RouteMatcher
         $methods = explode("|", $parts[0]);
         $route = $parts[1];
         
-        $methods = array_filter($methods, function (string $method) use ($routeDef) {
+        array_filter($methods, function (string $method) use ($routeDef) {
             if ( ! in_array($method, ["GET", "PUT", "DELETE", "POST", "HEADER", ""]))
                 throw new \InvalidArgumentException("Route definition invalid: '$routeDef' includes invalid request method: '$method' (Allowed: POST|GET|HEADER|PUT|DELETE)");
-            return $method;
+            return true;
         });
 
         if ( ! str_starts_with($route, "/"))
             throw new \InvalidArgumentException("Route definition invalid: '$routeDef': Route must start with slash /");
 
-        if ( ! in_array($request->getMethod(), $methods) || $methods[0] === "")
+        if ( ! in_array($request->getMethod(), $methods) && $methods[0] !== "")
             return false;
 
         $route = preg_replace("|\\*|", '.*', $route);
