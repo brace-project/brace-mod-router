@@ -21,37 +21,11 @@ class Router
     }
 
 
-    public function on(string $route="*", array $methods=["GET", "POST", "PUT", "DELETE"], callable $fn) : self
+    public function on(string $route, callable $fn) : self
     {
-        $this->routes[] = ["route"=>$route, "methods"=>$methods, "call" => $fn];
+        $this->routes[] = ["route"=>$route, "call" => $fn];
         return $this;
     }
-
-
-    public function onGet(string $route, callable $fn) : self
-    {
-        $this->routes[] = ["route"=>$route, "methods"=>["GET"], "call" => $fn];
-        return $this;
-    }
-
-    public function onPost(string $route, callable $fn) : self
-    {
-        $this->routes[] = ["route"=>$route, "methods"=>["POST"], "call" => $fn];
-        return $this;
-    }
-
-    public function onPut(string $route, callable $fn) : self
-    {
-        $this->routes[] = ["route"=>$route, "methods"=>["PUT"], "call" => $fn];
-        return $this;
-    }
-
-    public function onDelete(string $route, callable $fn) : self
-    {
-        $this->routes[] = ["route"=>$route, "methods"=>["DELETE"], "call" => $fn];
-        return $this;
-    }
-
 
     /**
      * @param ServerRequestInterface $serverRequest
@@ -61,18 +35,10 @@ class Router
     {
         foreach ($this->routes as $curRoute) {
             $routeParams = [];
-
-            if (isset ($curRoute["methods"])) {
-                if ( ! in_array(trim (strtoupper($serverRequest->getMethod())), $curRoute["methods"])) {
-                    continue;
-                }
+            if ( ! RouteMatcher::IsMatching($curRoute["route"], $serverRequest, $routeParams, $methods)) {
+                continue;
             }
 
-            if (isset($curRoute["route"])) {
-                if ( ! RouteMatcher::IsMatching($curRoute["route"], $serverRequest, $routeParams)) {
-                    continue;
-                }
-            } 
             return new Route(
                 $curRoute["route"],
                 $serverRequest->getUri()->getPath(),
