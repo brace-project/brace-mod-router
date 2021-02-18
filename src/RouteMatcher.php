@@ -12,8 +12,13 @@ class RouteMatcher
     public static function IsMatching (string $routeDef, ServerRequestInterface $request, &$params, &$methods) : bool
     {
 
-        [$methodDef, $route] = explode(":", $routeDef, 2);
-        $methods = explode("|", $methodDef);
+        $parts = explode("@", $routeDef, 2);
+        if (count ($parts) !== 2) {
+            throw new \InvalidArgumentException("Invalid route definition: '$routeDef': Proper syntax: GET|POST|PUT|DELETE@/route/:param/target");
+        }
+        $methods = explode("|", $parts[0]);
+        $route = $parts[1];
+        
         $methods = array_filter($methods, function (string $method) use ($routeDef) {
             if ( ! in_array($method, ["GET", "PUT", "DELETE", "POST", "HEADER"]))
                 throw new \InvalidArgumentException("Route definition invalid: '$routeDef' includes invalid request method: '$method' (Allowed: POST|GET|HEADER|PUT|DELETE)");
@@ -26,7 +31,7 @@ class RouteMatcher
         if ( ! in_array($request->getMethod(), $methods))
             return false;
 
-        $route = preg_replace("|\\*|", '.*', $routeDef);
+        $route = preg_replace("|\\*|", '.*', $route);
         $route = preg_replace("|::([a-zA-Z0-9_]+)|", '(?<$1>.*)', $route);
         $route = preg_replace("|/:([a-zA-Z0-9_]+)\\?|", '(/(?<$1>[^/]*))?', $route);
         $route = preg_replace("|:([a-zA-Z0-9_]+)|", '(?<$1>[^/]*)', $route);
