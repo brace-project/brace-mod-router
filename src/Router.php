@@ -21,8 +21,16 @@ class Router
     }
 
 
-    public function on(string $route, callable $fn) : self
+    /**
+     * @param string $route
+     * @param callable|class-string $fn
+     * @return $this
+     */
+    public function on(string $route, callable|string $fn) : self
     {
+        if (is_string($fn) && ! class_exists($fn))
+            throw new \InvalidArgumentException("Parameter 2 must be Closure or class-string: '$fn' class not existing");
+
         $this->routes[] = ["route"=>$route, "call" => $fn];
         return $this;
     }
