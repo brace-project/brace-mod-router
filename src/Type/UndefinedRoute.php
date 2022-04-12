@@ -14,6 +14,6 @@ class UndefinedRoute extends Route
 
     public function __construct(string $requestMethod, string $requestPath)
     {
-        parent::__construct($routeOrig=null, $requestPath, $requestMethod, new RouteParams([]), null);
+        parent::__construct($routeOrig=null, $requestPath, $requestMethod, new RouteParams([]), null, []);
     }
 }
