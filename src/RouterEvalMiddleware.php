@@ -23,7 +23,10 @@ class RouterEvalMiddleware extends BraceAbstractMiddleware
 
         foreach ($route->middleware as $mw) {
             if (is_string($mw)) {
-                $mw = phore_di_instantiate($mw, $this->app);
+                if ($this->app->isResolvable($mw))
+                    $mw = $this->app->resolve($mw);
+                else
+                    $mw = phore_di_instantiate($mw, $this->app);
             }
             $this->app->pipe->addMiddleWare($mw);
         }
