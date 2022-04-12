@@ -21,6 +21,13 @@ class RouterEvalMiddleware extends BraceAbstractMiddleware
         $this->app->define("route", new DiValue($route));
         $this->app->define("routeParams", new DiValue($route->routeParams));
 
+        foreach ($route->middleware as $mw) {
+            if (is_string($mw)) {
+                $mw = phore_di_instantiate($mw, $this->app);
+            }
+            $this->app->pipe->addMiddleWare($mw);
+        }
+
         // Call next middleware
         return $handler->handle($request);
     }

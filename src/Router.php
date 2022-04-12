@@ -8,15 +8,16 @@ use Brace\Router\Type\Route;
 use Brace\Router\Type\RouteParams;
 use Brace\Router\Type\UndefinedRoute;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
 
 class Router
 {
 
     private $routes = [];
 
-    public function delegate(string $route, string $className) : self
+    public function delegate(string $route, string $className, array $mw=[]) : self
     {
-        $this->routes[] = ["route"=>$route, "delegate"=>$className];
+        $this->routes[] = ["route"=>$route, "delegate"=>$className, "mw" => $mw];
         return $this;
     }
 
@@ -24,14 +25,15 @@ class Router
     /**
      * @param string $route
      * @param callable|class-string $fn
+     * @param MiddlewareInterface[]|class-string[] $mw
      * @return $this
      */
-    public function on(string $route, callable|string $fn) : self
+    public function on(string $route, callable|string $fn, array $mw = []) : self
     {
         if (is_string($fn) && ! class_exists($fn))
             throw new \InvalidArgumentException("Parameter 2 must be Closure or class-string: '$fn' class not existing");
 
-        $this->routes[] = ["route"=>$route, "call" => $fn];
+        $this->routes[] = ["route"=>$route, "call" => $fn, "mw" => $mw];
         return $this;
     }
 
@@ -52,7 +54,8 @@ class Router
                 $serverRequest->getUri()->getPath(),
                 $serverRequest->getMethod(),
                 new RouteParams($routeParams),
-                $curRoute["call"]
+                $curRoute["call"],
+                $curRoute["mw"]
             );
         }
         return new UndefinedRoute($serverRequest->getMethod(), $serverRequest->getUri()->getPath());

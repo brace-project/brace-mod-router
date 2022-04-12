@@ -4,6 +4,7 @@
 namespace Brace\Router\Type;
 
 use Brace\Core\Helper\Immutable;
+use Psr\Http\Server\MiddlewareInterface;
 
 /**
  * Class Route
@@ -14,6 +15,7 @@ use Brace\Core\Helper\Immutable;
  * @property string $requestPath    The current Request Path
  * @property RouteParams $routeParams
  * @property callable|null $controller      The Controller to call
+ * @property MiddlewareInterface[]|class-string[] $middleware
  */
 class Route extends Immutable
 {
@@ -34,14 +36,15 @@ class Route extends Immutable
      * @param RouteParams $routeParams
      * @param $controller
      */
-    public function __construct($routeOrig, $requestPath, $requestMethod, RouteParams $routeParams, $controller)
+    public function __construct($routeOrig, $requestPath, $requestMethod, RouteParams $routeParams, $controller, array $middleware)
     {
         parent::__construct([
             "routeOrig" => $routeOrig,
             "requestMethod" => $requestMethod,
             "requestPath" => $requestPath,
             "routeParams" => $routeParams,
-            "controller" => $controller
+            "controller" => $controller,
+            "middleware" => $middleware
         ]);
     }
 
