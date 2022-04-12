@@ -5,7 +5,9 @@ namespace Brace\Router;
 
 
 use Brace\Core\Base\BraceAbstractMiddleware;
+use Brace\Core\Base\CallbackMiddleware;
 use Brace\Core\BraceApp;
+use Brace\Core\Mw\Next;
 use Brace\Core\ReturnFormatterInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -33,25 +35,44 @@ class RouterDispatchMiddleware extends BraceAbstractMiddleware
     {
         $response = null;
         if ($this->app->route->isDefined()) {
-            $controller = $this->app->route->controller;
-            if (is_string($controller)) {
-                $class = phore_di_instantiate($controller, $this->app);
-                $controller = \Closure::fromCallable([$class, "__invoke"]);
-            }
 
-            $response = phore_di_call($controller, $this->app);
-            if ($response === null)
-                throw new \InvalidArgumentException("Controller " . phore_debug_type($controller) . " returned null");
-            if ($response instanceof ResponseInterface)
-                return $response;
-
-            foreach ($this->returnFormatters as $returnFormatter) {
-                if ($returnFormatter->canHandle($response)) {
-                    // Use first ReturnFormatter found
-                    return $returnFormatter->transform($response);;
+            $pipe = new Next();
+            foreach ($this->app->route->middleware as $mw) {
+                if (is_string($mw)) {
+                    if ($this->app->isResolvable($mw))
+                        $mw = $this->app->resolve($mw);
+                    else
+                        $mw = phore_di_instantiate($mw, $this->app);
                 }
+                $pipe->addMiddleWare($mw);
             }
-            throw new \InvalidArgumentException("Controller " . phore_debug_type($controller) . " returned " . phore_debug_type($response). ". No ReturnFormatter can handle it.");
+
+            $pipe->addMiddleWare(new CallbackMiddleware(
+                function (ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface {
+                    $controller = $this->app->route->controller;
+                    if (is_string($controller)) {
+                        $class = phore_di_instantiate($controller, $this->app);
+                        $controller = \Closure::fromCallable([$class, "__invoke"]);
+                    }
+
+                    $response = phore_di_call($controller, $this->app);
+                    if ($response === null)
+                        throw new \InvalidArgumentException("Controller " . phore_debug_type($controller) . " returned null");
+                    if ($response instanceof ResponseInterface)
+                        return $response;
+
+                    foreach ($this->returnFormatters as $returnFormatter) {
+                        if ($returnFormatter->canHandle($response)) {
+                            // Use first ReturnFormatter found
+                            return $returnFormatter->transform($response);;
+                        }
+                    }
+                    throw new \InvalidArgumentException("Controller " . phore_debug_type($controller) . " returned " . phore_debug_type($response). ". No ReturnFormatter can handle it.");
+                }
+            ));
+
+            return $pipe->handle($request);
+
         }
 
         // Call next handler

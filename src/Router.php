@@ -23,6 +23,9 @@ class Router
 
 
     /**
+     * 
+     * Parameter3: Can be a instance of MiddlewareInterface, a Class-String or a name of a dependency
+     * 
      * @param string $route
      * @param callable|class-string $fn
      * @param MiddlewareInterface[]|class-string[] $mw
