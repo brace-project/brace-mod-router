@@ -44,6 +44,8 @@ class RouterDispatchMiddleware extends BraceAbstractMiddleware
                     else
                         $mw = phore_di_instantiate($mw, $this->app);
                 }
+                if ($mw instanceof BraceAbstractMiddleware)
+                    $mw->_setApp($this->app);
                 $pipe->addMiddleWare($mw);
             }
 
