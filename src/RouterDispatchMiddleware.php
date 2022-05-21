@@ -52,7 +52,12 @@ class RouterDispatchMiddleware extends BraceAbstractMiddleware
             $pipe->addMiddleWare(new CallbackMiddleware(
                 function (ServerRequestInterface $request, RequestHandlerInterface $handler) : ResponseInterface {
                     $controller = $this->app->route->controller;
-                    if (is_string($controller)) {
+                    if (is_array($controller) && is_string($controller[0])) {
+                        // Handle static definition [class::class, method]
+                        $class = phore_di_instantiate($controller[0], $this->app);
+                        $controller = \Closure::fromCallable([$class, $controller[1]]);
+                    } else if (is_string($controller)) {
+                        // Handle pure ClassNames
                         $class = phore_di_instantiate($controller, $this->app);
                         $controller = \Closure::fromCallable([$class, "__invoke"]);
                     }
