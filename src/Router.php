@@ -23,15 +23,29 @@ class Router
 
 
     /**
-     * 
+     * Register a Class implementing RoutableCtrl
+     *
+     * @param string $mountPoint
+     * @param class-string $className
+     * @param array $mw
+     * @return void
+     */
+    public function registerClass(string $mountPoint, string $className, array $mw=[]) {
+        if ( ! is_subclass_of($className, RoutableCtrl::class))
+            throw new \InvalidArgumentException("Class '$className' doesn't implement RoutableCtrl");
+        $className::Routes($this, $mountPoint, $mw);
+    }
+
+    /**
+     *
      * Parameter3: Can be a instance of MiddlewareInterface, a Class-String or a name of a dependency
-     * 
+     *
      * @param string $route
      * @param callable|class-string $fn
      * @param MiddlewareInterface[]|class-string[] $mw
      * @return $this
      */
-    public function on(string $route, callable|string $fn, array $mw = []) : self
+    public function on(string $route, callable|string|array $fn, array $mw = []) : self
     {
         if (is_string($fn) && ! class_exists($fn))
             throw new \InvalidArgumentException("Parameter 2 must be Closure or class-string: '$fn' class not existing");
