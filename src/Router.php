@@ -45,14 +45,31 @@ class Router
      * @param MiddlewareInterface[]|class-string[] $mw
      * @return $this
      */
-    public function on(string $route, callable|string|array $fn, array $mw = []) : self
+    public function on(string $route, callable|string|array $fn, array $mw = [], string $name=null) : self
     {
         if (is_string($fn) && ! class_exists($fn))
             throw new \InvalidArgumentException("Parameter 2 must be Closure or class-string: '$fn' class not existing");
 
-        $this->routes[] = ["route"=>$route, "call" => $fn, "mw" => $mw];
+        $this->routes[] = ["route"=>$route, "call" => $fn, "mw" => $mw, "name"=>$name];
         return $this;
     }
+
+
+    public function getJSStub () : string {
+        $data = [];
+        foreach ($this->routes as $curRoute) {
+            if ($curRoute["name"] === null)
+                continue;
+            [$method, $route] = explode("@", $curRoute["route"]);
+            $data[$curRoute["name"]] = preg_replace_callback("/:([a-zA-Z0-9\-\_]+)/", fn($match) => "{" . $match[1] . "}", $route );
+        }
+        return "const API = " . phore_json_encode($data, prettyPrint: true) . ";";
+    }
+
+    public function writeJSStub(string $fileName) {
+        phore_file($fileName)->set_contents($this->getJSStub());
+    }
+
 
     /**
      * @param ServerRequestInterface $serverRequest
