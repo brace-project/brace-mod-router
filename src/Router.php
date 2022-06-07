@@ -60,8 +60,11 @@ class Router
         foreach ($this->routes as $curRoute) {
             if ($curRoute["name"] === null)
                 continue;
-            [$method, $route] = explode("@", $curRoute["route"]);
-            $data[$curRoute["name"]] = preg_replace_callback("/:([a-zA-Z0-9\-\_]+)/", fn($match) => "{" . $match[1] . "}", $route );
+            [$methods, $route] = explode("@", $curRoute["route"]);
+            foreach (explode("|", $methods) as $method) {
+
+                $data[$method . "@" . $curRoute["name"]] = preg_replace_callback("/:([a-zA-Z0-9\-\_]+)/", fn($match) => "{" . $match[1] . "}", $method . "@" . $route );
+            }
         }
         return "const API = " . phore_json_encode($data, prettyPrint: true) . ";";
     }
