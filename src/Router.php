@@ -70,7 +70,10 @@ class Router
     }
 
     public function writeJSStub(string $fileName) {
-        phore_file($fileName)->set_contents($this->getJSStub());
+        $content = $this->getJSStub();
+        $file = phore_file($fileName);
+        if ($file->get_contents() !== $content)
+            $file->set_contents($content);
     }
 
 
