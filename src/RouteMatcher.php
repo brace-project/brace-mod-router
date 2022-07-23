@@ -9,6 +9,16 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class RouteMatcher
 {
+
+
+    public static function BuildPreg ($routeDef) : string {
+        $route = preg_replace("|\\*|", '.*', $routeDef);
+        $route = preg_replace("|::([a-zA-Z0-9_]+)|", '(?<$1>.*)', $route);
+        $route = preg_replace("|/:([a-zA-Z0-9_]+)\\?|", '(/(?<$1>[^/]*))?', $route);
+        $route = preg_replace("|:([a-zA-Z0-9_]+)|", '(?<$1>[^/]*)', $route);
+        return $route;
+    }
+
     public static function IsMatching (string $routeDef, ServerRequestInterface $request, &$params, &$methods) : bool
     {
 
@@ -31,10 +41,7 @@ class RouteMatcher
         if ( ! in_array($request->getMethod(), $methods) && $methods[0] !== "")
             return false;
 
-        $route = preg_replace("|\\*|", '.*', $route);
-        $route = preg_replace("|::([a-zA-Z0-9_]+)|", '(?<$1>.*)', $route);
-        $route = preg_replace("|/:([a-zA-Z0-9_]+)\\?|", '(/(?<$1>[^/]*))?', $route);
-        $route = preg_replace("|:([a-zA-Z0-9_]+)|", '(?<$1>[^/]*)', $route);
+        $route = self::BuildPreg($route);
 
         $path = $request->getUri()->getPath();
         if(preg_match("|^" . $route . "$|", $path, $params)) {

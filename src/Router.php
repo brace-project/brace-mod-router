@@ -22,6 +22,23 @@ class Router
     }
 
 
+    public function debugGetRoutes($return = false) : ?array{
+        $debug = [];
+        foreach ($this->routes as $route) {
+            $debug[] = [
+                "route" => $route["route"],
+                "match" => RouteMatcher::BuildPreg($route["route"])
+            ];
+        }
+        if ($return === false) {
+
+            print_r($debug);
+            return null;
+        }
+        return $debug;
+    }
+
+
     /**
      * Register a Class implementing RoutableCtrl
      *
