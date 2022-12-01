@@ -16,6 +16,9 @@ class RouteMatcher
         $route = preg_replace("|::([a-zA-Z0-9_]+)|", '(?<$1>.*)', $route);
         $route = preg_replace("|/:([a-zA-Z0-9_]+)\\?|", '(/(?<$1>[^/]*))?', $route);
         $route = preg_replace("|:([a-zA-Z0-9_]+)|", '(?<$1>[^/]*)', $route);
+
+        // New Syntax
+        $route = preg_replace("|\{([a-zA-Z0-9_]+)\}|", '(?<$1>[^/]*)', $route);
         return $route;
     }
 
@@ -28,7 +31,7 @@ class RouteMatcher
         }
         $methods = explode("|", $parts[0]);
         $route = $parts[1];
-        
+
         array_filter($methods, function (string $method) use ($routeDef) {
             if ( ! in_array($method, ["GET", "PUT", "DELETE", "POST", "HEADER", ""]))
                 throw new \InvalidArgumentException("Route definition invalid: '$routeDef' includes invalid request method: '$method' (Allowed: POST|GET|HEADER|PUT|DELETE)");
