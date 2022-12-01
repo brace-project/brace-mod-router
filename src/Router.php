@@ -4,6 +4,7 @@
 namespace Brace\Router;
 
 
+use Brace\Router\Attributes\BraceRoute;
 use Brace\Router\Type\Route;
 use Brace\Router\Type\RouteParams;
 use Brace\Router\Type\UndefinedRoute;
@@ -40,7 +41,7 @@ class Router
 
 
     /**
-     * Register a Class implementing RoutableCtrl
+     * Register a Class implementing RoutableCtrl or has public 
      *
      * @param string $mountPoint
      * @param class-string $className
@@ -48,9 +49,24 @@ class Router
      * @return void
      */
     public function registerClass(string $mountPoint, string $className, array $mw=[]) {
-        if ( ! is_subclass_of($className, RoutableCtrl::class))
-            throw new \InvalidArgumentException("Class '$className' doesn't implement RoutableCtrl");
-        $className::Routes($this, $mountPoint, $mw);
+        if (is_subclass_of($className, RoutableCtrl::class)) {
+            $className::Routes($this, $mountPoint, $mw);
+            return;
+        }
+        
+        $reflection = new \ReflectionClass($className);
+        foreach ($reflection->getMethods() as $method) {
+            $attrs = $method->getAttributes(BraceRoute::class);
+            if (count($attrs) === 0)
+                continue;
+            if ( ! $method->isPublic()) {
+                throw new \InvalidArgumentException("Attribute 'BraceRoute' defined on private method: " . $className . "::" . $method . "() should be public!");
+            }
+            $curAttr = $attrs[0]->newInstance();
+            assert($curAttr instanceof BraceRoute);
+            $curAttr->__registerRoute($reflection->name, $method->name, $this, $mw, $mountPoint);
+        }
+        
     }
 
     /**
