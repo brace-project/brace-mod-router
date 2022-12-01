@@ -47,7 +47,7 @@ class BraceRoute
      */
     public function __registerRoute(string $className, string $methodName, Router $router, array $mw=[], string $mount="") {
         [$method, $route] = explode("@", $this->route, 2);
-        $routeActual = $method . "@" . $mount . $this->route;
+        $routeActual = $method . "@" . $mount . $route;
 
         foreach ($this->mw as $curMw) {
             $mw[] = $curMw;

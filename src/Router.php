@@ -70,6 +70,20 @@ class Router
     }
 
     /**
+     * Return array containing all Routes in chronological order.
+     * 
+     * @return string[]
+     */
+    public function dumpRoutes() : array {
+        $ret = [];
+        foreach ($this->routes as $route) {
+            
+            $ret[] = $route["route"] . " => " . phore_debug_type($route["call"]) . " (" . $route["name"] . ")";
+        }
+        return $ret;
+    }
+
+    /**
      *
      * Parameter3: Can be a instance of MiddlewareInterface, a Class-String or a name of a dependency
      *
