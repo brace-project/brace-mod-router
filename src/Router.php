@@ -41,7 +41,7 @@ class Router
 
 
     /**
-     * Register a Class implementing RoutableCtrl or has public 
+     * Register a Class implementing RoutableCtrl or has public
      *
      * @param string $mountPoint
      * @param class-string $className
@@ -53,7 +53,7 @@ class Router
             $className::Routes($this, $mountPoint, $mw);
             return;
         }
-        
+
         $reflection = new \ReflectionClass($className);
         foreach ($reflection->getMethods() as $method) {
             $attrs = $method->getAttributes(BraceRoute::class);
@@ -66,18 +66,18 @@ class Router
             assert($curAttr instanceof BraceRoute);
             $curAttr->__registerRoute($reflection->name, $method->name, $this, $mw, $mountPoint);
         }
-        
+
     }
 
     /**
      * Return array containing all Routes in chronological order.
-     * 
+     *
      * @return string[]
      */
     public function dumpRoutes() : array {
         $ret = [];
         foreach ($this->routes as $route) {
-            
+
             $ret[] = $route["route"] . " => " . phore_debug_type($route["call"]) . " (" . $route["name"] . ")";
         }
         return $ret;
@@ -113,7 +113,7 @@ class Router
                 $data[$curRoute["name"] . "_" . $method] = preg_replace_callback("/::?([a-zA-Z0-9\-\_]+)/", fn($match) => "{" . $match[1] . "}", $method . "@" . $route );
             }
         }
-        return "const API = " . phore_json_encode($data, prettyPrint: true) . ";";
+        return "export const API = " . phore_json_encode($data, prettyPrint: true) . ";";
     }
 
     public function writeJSStub(string $fileName) {
