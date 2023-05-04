@@ -4,6 +4,7 @@
 namespace Brace\Router;
 
 
+use Brace\Core\Helper\ClassFileParser;
 use Brace\Router\Attributes\BraceRoute;
 use Brace\Router\Type\Route;
 use Brace\Router\Type\RouteParams;
@@ -41,6 +42,34 @@ class Router
 
 
     /**
+     * Autoload Controller Files
+     *
+     *
+     * @param string $mountPoint    e.g. "/api" or "" if none
+     * @param string $path          e.g. __DIR__ . "/../src/Ctrl/*.php"
+     * @param array $mw             Middlewares to apply to all routes
+     * @return void
+     */
+    public function autoload(string $mountPoint, string $path, array $mw = []) : void {
+        $files = glob($path);
+        $numberLoaded = 0;
+        foreach ($files as $file) {
+            if ( ! endsWith($file, ".php"))
+                continue;
+            $classNames = ClassFileParser::extractPhpClasses($file);
+            if ($classNames === null)
+                continue;
+
+            foreach ($classNames as $curClassName) {
+                $numberLoaded++;
+                $this->registerClass($mountPoint, $curClassName, $mw);
+            }
+        }
+        if ($numberLoaded === 0)
+            throw new \InvalidArgumentException("No Controllers found in '$path'");
+    }
+
+    /**
      * Register a Class implementing RoutableCtrl or has public
      *
      * @param string $mountPoint
@@ -66,8 +95,8 @@ class Router
             assert($curAttr instanceof BraceRoute);
             $curAttr->__registerRoute($reflection->name, $method->name, $this, $mw, $mountPoint);
         }
-
     }
+
 
     /**
      * Return array containing all Routes in chronological order.
