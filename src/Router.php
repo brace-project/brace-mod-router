@@ -4,6 +4,8 @@
 namespace Brace\Router;
 
 
+use Brace\Core\BraceApp;
+use Brace\Core\EnvironmentType;
 use Brace\Core\Helper\ClassFileParser;
 use Brace\Router\Attributes\BraceRoute;
 use Brace\Router\Type\Route;
@@ -16,6 +18,11 @@ class Router
 {
 
     private $routes = [];
+
+    public function __construct(protected BraceApp $app) {
+
+    }
+
 
     public function delegate(string $route, string $className, array $mw=[]) : self
     {
@@ -146,6 +153,8 @@ class Router
     }
 
     public function writeJSStub(string $fileName) {
+        if ($this->app->environmentType !== EnvironmentType::DEVELOPMENT)
+            return; // Only write stubs in development mode
         $content = $this->getJSStub();
         $file = phore_file($fileName);
         if ($file->get_contents() !== $content)
