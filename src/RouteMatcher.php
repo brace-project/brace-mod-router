@@ -44,14 +44,15 @@ class RouteMatcher
         if ( ! in_array($request->getMethod(), $methods) && $methods[0] !== "")
             return false;
 
+        $route = str_replace("(", "\(", $route);
+        $route = str_replace(")", "\)", $route);
         $route = self::BuildPreg($route);
 
         $path = $request->getUri()->getPath();
-        
+
         // Allow method() in route definition
-        $route = str_replace("(", "\(", $route);
-        $route = str_replace(")", "\)", $route);
-        
+
+
         if(preg_match("|^" . $route . "$|", $path, $params)) {
             foreach ($params as $key => $val) {
                 if ($val == "") {
