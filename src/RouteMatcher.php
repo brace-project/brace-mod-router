@@ -49,7 +49,7 @@ class RouteMatcher
         $route = self::BuildPreg($route);
 
         $path = $request->getUri()->getPath();
-
+       
         // Allow method() in route definition
 
 
