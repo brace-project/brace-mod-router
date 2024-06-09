@@ -46,7 +46,13 @@ class BraceRoute
      * @return void
      */
     public function __registerRoute(string $className, string $methodName, Router $router, array $mw=[], string $mount="") {
-        [$method, $route] = explode("@", $this->route, 2);
+        $routeArr =  explode("@", $this->route, 2);
+        
+        if (count($routeArr) !== 2)
+            throw new \InvalidArgumentException("Invalid route definition: '" . $this->route . "' should be METHOD@route in $className::$methodName()");
+        
+        [$method, $route] = $routeArr;
+        
         $routeActual = $method . "@" . $mount . $route;
 
         foreach ($this->mw as $curMw) {
