@@ -37,6 +37,7 @@ class Router
         $this->routePrefix = $routePrefix;
         return $this;
     }
+    
 
     public function getRoutePrefix() : string
     {
