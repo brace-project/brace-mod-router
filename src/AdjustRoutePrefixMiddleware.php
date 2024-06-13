@@ -18,6 +18,7 @@ class AdjustRoutePrefixMiddleware extends BraceAbstractMiddleware
         if ( ! str_starts_with($request->getUri()->getPath(), $routePrefix)) {
             throw new \InvalidArgumentException("Route prefix missmatch: Got '{$request->getUri()->getPath()}', expected to start with '$routePrefix' (Possible misconfiguration in route prefix?)");
         }
+        $request = $request->withAttribute("origRequest", $request);
         $request = $request->withUri($request->getUri()->withPath(substr($request->getUri()->getPath(), strlen($routePrefix))));
         return $handler->handle($request);
 
