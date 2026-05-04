@@ -37,12 +37,16 @@ class RouteMatcher
                 throw new \InvalidArgumentException("Route definition invalid: '$routeDef' includes invalid request method: '$method' (Allowed: POST|GET|HEADER|PUT|DELETE)");
             return true;
         });
+        
 
         if ( ! str_starts_with($route, "/"))
             throw new \InvalidArgumentException("Route definition invalid: '$routeDef': Route must start with slash /");
 
-        if ( ! in_array($request->getMethod(), $methods) && $methods[0] !== "")
-            return false;
+        if ($request->getMethod() !== "OPTIONS") {
+            if ( ! in_array($request->getMethod(), $methods) && $methods[0] !== "")
+                return false;
+        }
+        
 
         $route = str_replace("(", "\(", $route);
         $route = str_replace(")", "\)", $route);
