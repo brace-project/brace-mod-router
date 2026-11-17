@@ -23,7 +23,7 @@ class Router
     private string $routePrefix = "";
 
     public function __construct(protected BraceApp $app, ?string $prefix = null) {
-        $this->prefix = $this->normalizePrefix($prefix ?? $app->appBasePath);
+        $this->prefix = $this->normalizePrefix($prefix ?? $app->url_prefix);
     }
 
     public function getPrefix(): string
