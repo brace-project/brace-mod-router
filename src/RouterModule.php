@@ -21,9 +21,13 @@ class RouterModule implements BraceModule
      */
     private $app;
 
+    public function __construct(private ?string $prefix = null)
+    {
+    }
+
     public function register(BraceApp $app)
     {
         $this->app = $app;
-        $app->define("router", new DiValue(new Router($app)));
+        $app->define("router", new DiValue(new Router($app, $this->prefix)));
     }
 }

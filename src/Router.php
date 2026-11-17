@@ -18,11 +18,17 @@ class Router
 {
 
     private $routes = [];
+    private string $prefix;
 
     private string $routePrefix = "";
 
-    public function __construct(protected BraceApp $app) {
+    public function __construct(protected BraceApp $app, ?string $prefix = null) {
+        $this->prefix = $this->normalizePrefix($prefix ?? $app->appBasePath);
+    }
 
+    public function getPrefix(): string
+    {
+        return $this->prefix;
     }
 
 
@@ -46,7 +52,7 @@ class Router
 
     public function delegate(string $route, string $className, array $mw=[]) : self
     {
-        $this->routes[] = ["route"=>$route, "delegate"=>$className, "mw" => $mw];
+        $this->routes[] = ["route"=>$this->prefixRoute($route), "delegate"=>$className, "mw" => $mw];
         return $this;
     }
 
@@ -126,6 +132,19 @@ class Router
 
 
     /**
+     * Return named routes in registration order for tooling such as API generators.
+     *
+     * @return list<array{route:string,call:callable|class-string|array,mw:array,name:string}>
+     */
+    public function getNamedRoutes(): array
+    {
+        return array_values(array_filter(
+            $this->routes,
+            static fn (array $route): bool => isset($route['name'], $route['call']) && $route['name'] !== '',
+        ));
+    }
+
+    /**
      * Return array containing all Routes in chronological order.
      *
      * @return string[]
@@ -153,8 +172,39 @@ class Router
         if (is_string($fn) && ! class_exists($fn))
             throw new \InvalidArgumentException("Parameter 2 must be Closure or class-string: '$fn' class not existing");
 
-        $this->routes[] = ["route"=>$route, "call" => $fn, "mw" => $mw, "name"=>$name];
+        $this->routes[] = ["route"=>$this->prefixRoute($route), "call" => $fn, "mw" => $mw, "name"=>$name];
         return $this;
+    }
+
+
+    private function normalizePrefix(string $prefix): string
+    {
+        $prefix = trim($prefix);
+        if ($prefix === '' || $prefix === '/') {
+            return '';
+        }
+        return '/' . trim($prefix, '/');
+    }
+
+    private function prefixRoute(string $route): string
+    {
+        if ($this->prefix === '') {
+            return $route;
+        }
+        $separator = strpos($route, '@');
+        if ($separator === false) {
+            return $this->prefixPath($route);
+        }
+        return substr($route, 0, $separator + 1) . $this->prefixPath(substr($route, $separator + 1));
+    }
+
+    private function prefixPath(string $path): string
+    {
+        $path = '/' . ltrim($path, '/');
+        if ($path === $this->prefix || str_starts_with($path, $this->prefix . '/')) {
+            return $path;
+        }
+        return $path === '/' ? $this->prefix . '/' : $this->prefix . $path;
     }
 
 
