@@ -1,0 +1,4 @@
+suites:
+  router:
+    namespace: Brace\Router
+    psr4_prefix: Brace\Router

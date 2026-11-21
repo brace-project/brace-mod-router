@@ -1,6 +1,12 @@
 # brace-mod-router
 
-Core Router
+Core Router. Requires PHP 8.5 or newer.
+
+## Unit tests
+
+Run `composer install` followed by `composer test` from the package root.
+The PHPSpec suite covers query attribute resolution and query validation.
+GitHub Actions runs the suite on PHP 8.5 for pushes and pull requests.
 
 ## Explicit query parameters
 

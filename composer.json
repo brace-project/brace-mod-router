@@ -12,11 +12,13 @@
         }
     ],
     "require": {
+        "php": ">=8.5",
         "brace/core": "*"
     },
 
     "require-dev": {
         "phore/tester": "*",
+        "phpspec/phpspec": "^8.0",
         "brace/mod-request-laminas": "*"
     },
     "autoload": {
@@ -29,6 +31,9 @@
     "autoload-dev": {
         "psr-4": {
         }
+    },
+    "scripts": {
+        "test": "phpspec run --format=pretty --no-interaction"
     },
     "minimum-stability": "dev",
     "extra": {
