@@ -62,7 +62,39 @@ class RouterDispatchMiddleware extends BraceAbstractMiddleware
                         $controller = \Closure::fromCallable([$class, "__invoke"]);
                     }
 
-                    $response = phore_di_call($controller, $this->app);
+                    $resolver = new QueryParameterResolver();
+                    $reflection = $resolver->reflect($controller);
+                    $definitions = $resolver->resolve($reflection);
+                    try {
+                        $query = (new QueryParamsValidator())->validate(
+                            $request->getQueryParams(), $definitions, $resolver->acceptsAdditional($reflection),
+                        );
+                    } catch (\InvalidArgumentException $exception) {
+                        $response = $this->app->responseFactory->createResponse(400);
+                        $response->getBody()->write($exception->getMessage());
+                        return $response->withHeader('Content-Type', 'text/plain; charset=utf-8');
+                    }
+                    $parameters = [];
+                    foreach ($definitions as $name => $definition) {
+                        if ($definition['parameter'] !== null) {
+                            $parameters[$definition['parameter']] = new \Phore\Di\Container\Producer\DiValue($query[$name]);
+                        }
+                    }
+                    if ($resolver->acceptsAdditional($reflection)) {
+                        foreach ($reflection->getParameters() as $parameter) {
+                            if ($parameter->getName() !== 'query') {
+                                continue;
+                            }
+                            $type = $parameter->getType();
+                            $queryValue = $type instanceof \ReflectionNamedType && !$type->isBuiltin()
+                                ? phore_hydrate($query, $type->getName()) : $query;
+                            $parameters['query'] = new \Phore\Di\Container\Producer\DiValue($queryValue);
+                        }
+                    }
+                    $parameters['queryParams'] = new \Phore\Di\Container\Producer\DiValue(
+                        new \Brace\Core\Helper\QueryParams($request->getQueryParams()),
+                    );
+                    $response = phore_di_call($controller, $this->app, $parameters);
                     if ($response === null)
                         throw new \InvalidArgumentException("Controller " . phore_debug_type($controller) . " returned null");
                     if ($response instanceof ResponseInterface)
